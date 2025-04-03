@@ -85,11 +85,14 @@
             {{ productStore.Listproducts()!.data.length }} Resultados
           </td>
           <td colspan="1">
-            <select class="px-2 py-1 border rounded-md">
-              <option> {{ productStore.Listproducts()!.data.length }}
-              </option>
+            <select class="px-2 py-1 border rounded-md" [(ngModel)]="itemsPerPage" (change)=" productStore.setItemsPerPage(itemsPerPage)">
+              <option [value]="5">5</option>
+              <option [value]="10">10</option>
+              <option [value]="20">20</option>
             </select>
+
           </td>
+
         </tr>
 
       </tfoot>

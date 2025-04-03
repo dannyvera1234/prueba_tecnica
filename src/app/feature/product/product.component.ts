@@ -35,12 +35,12 @@ export class ProductComponent {
   public readonly productStore = inject(PRODUCT_INITIAL_STATE);
   public readonly isMenuOpen = signal<number | null>(null);
   public readonly title = signal<string | null>(null);
+  itemsPerPage = this.productStore.itemsPerPage();
   searchTerm: string = '';
 
   constructor(private elRef: ElementRef) {
     this.productStore.allProducts();
   }
-
 
   onSearch(): void {
     this.productStore.searchTerm(this.searchTerm);

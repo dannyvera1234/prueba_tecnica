@@ -16,7 +16,7 @@ export interface ProductState {
   idProduct: string | null;
   modals: Record<string, ModalState>;
   searchTerm: string | null,
-  itemsPerPage: number | null
+  itemsPerPage: number
 }
 
 
@@ -25,7 +25,7 @@ const initialState: ProductState = {
   loading: false,
   idProduct: null,
   searchTerm: null,
-  itemsPerPage: null,
+  itemsPerPage: 10,
   modals: {
     addProduct: {
       isOpen: false,
@@ -47,6 +47,11 @@ export const PRODUCT_INITIAL_STATE = signalStore(
       idProduct: (ide: string) => { patchState(store, { idProduct: ide }) },
 
       searchTerm: (term: string) => { patchState(store, { searchTerm: term }) },
+
+      setItemsPerPage: (items: number) => {
+        patchState(store, { itemsPerPage: items })
+      },
+
 
       openModal: (modalName: string) => {
         patchState(store, {
@@ -70,16 +75,17 @@ export const PRODUCT_INITIAL_STATE = signalStore(
         return store.modals()[modalName]?.isOpen || false;
       },
 
-
       allProducts() {
-        of(patchState(store, { loading: true })).pipe(
-          mergeMap(() => productService.getProducts()),
-          finalize(() => patchState(store, { loading: false }))
-        ).subscribe((data: any) => {
-          patchState(store, { Listproducts: data });
-        })
+        of(patchState(store, { loading: true }))
+          .pipe(
+            mergeMap(() => productService.getProducts()),
+            finalize(() => patchState(store, { loading: false }))
+          )
+          .subscribe((data: any) => {
+            const limit = store.itemsPerPage() || data.data.length;
+            patchState(store, { Listproducts: { data: data.data.slice(0, limit) } });
+          });
       },
-
       createProduct(product: any) {
         patchState(store, { loading: true });
         productService.createProduct(product.value).pipe(
@@ -87,7 +93,7 @@ export const PRODUCT_INITIAL_STATE = signalStore(
         ).subscribe((resp: any) => {
           patchState(store, { modals: { ...store.modals(), addModal: { isOpen: false } } });
           patchState(store, { Listproducts: { data: [...store.Listproducts().data, resp.data] }, });
-           product.reset();
+          product.reset();
         });
       },
 
@@ -120,7 +126,7 @@ export const PRODUCT_INITIAL_STATE = signalStore(
           )
           .subscribe((resp) => {
             router.navigate(['/product']);
-             product.reset();
+            product.reset();
           });
       },
 
